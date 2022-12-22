@@ -10,7 +10,7 @@ canvas {
 :root {
   --dark-bg: rgba(15, 15, 15, 0.95);
   --spacing: 350px;
-
+  overflow-x: hidden;
   font-family: brandon-grotesque, sans-serif;
   font-weight: 400;
   font-style: normal;
@@ -18,6 +18,7 @@ canvas {
 
 
 main {
+ 
   width: 100vw;
   color: white;
   z-index: 99;
@@ -36,15 +37,8 @@ h1, h2, h3, blockquote {
   font-style: normal;
 }
 
-canvas {
-  position: fixed;
-  top: 0;
-  left: 0;
-}
-
-
-
   header {
+    opacity: .8;
     background: var(--dark-bg);
     grid-column: 2 / span 5;
     font-size: 2.5rem;
@@ -53,6 +47,7 @@ canvas {
   }
 
   section {
+    opacity: .8;
     grid-column: 2 / 8;
     padding: 1rem;
     background: var(--dark-bg);
@@ -62,6 +57,7 @@ canvas {
   }
 
   blockquote {
+    opacity: .8;
     margin: 0;
     padding: 0;
     grid-column: 2 / span 9;

@@ -1,12 +1,18 @@
 import "./style.css";
 import * as THREE from "THREE";
 import { OrbitControls } from "THREE/examples/jsm/controls/OrbitControls";
+import { ClampToEdgeWrapping } from "THREE";
+
+const sizes = {
+  width: window.innerWidth,
+  height: window.innerHeight,
+};
 
 // scene and camera
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
   75,
-  window.innerWidth / window.innerHeight,
+  sizes.width / sizes.height,
   0.1,
   1000
 );
@@ -20,7 +26,7 @@ const renderer = new THREE.WebGL1Renderer({
 });
 
 renderer.setPixelRatio(window.devicePixelRatio);
-renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setSize(sizes.width, sizes.height);
 
 renderer.render(scene, camera);
 
@@ -35,15 +41,16 @@ const torus = new THREE.Mesh(geometry, material);
 
 // lights
 const pointLight = new THREE.PointLight(0xffffff);
-pointLight.position.set(5,5,5);
+pointLight.position.set(5, 5, 5);
 scene.add(pointLight);
 
-const ambientLight = new THREE.AmbientLight(0xffffff);
+const ambientLight = new THREE.AmbientLight(0x333333);
 scene.add(pointLight, ambientLight);
 
 // helpers
 const lightHelper = new THREE.PointLightHelper(pointLight);
 const gridHelper = new THREE.GridHelper(200, 50);
+const axesHelper = new THREE.AxesHelper(5);
 //scene.add(lightHelper, gridHelper);
 
 // controls
@@ -51,7 +58,7 @@ const gridHelper = new THREE.GridHelper(200, 50);
 
 //stars
 const starGeometry = new THREE.SphereGeometry(0.05, 24, 24);
-const starMaterial = new THREE.MeshStandardMaterial({ color: 0xf7ebda });
+const starMaterial = new THREE.MeshBasicMaterial({ color: 0xf7ebda });
 
 function addStar() {
   const star = new THREE.Mesh(starGeometry, starMaterial);
@@ -68,11 +75,14 @@ Array(200).fill().forEach(addStar);
 const spaceTexture = new THREE.TextureLoader().load("space.jpg");
 scene.background = spaceTexture;
 
-// Avatar
-const cubeTexture = new THREE.TextureLoader().load('kona.jpeg');
-const cube = new THREE.Mesh(new THREE.BoxGeometry(3, 3, 3), new THREE.MeshBasicMaterial({ map: cubeTexture }));
-cube.position.z = -5
-cube.position.x = 2
+// cube
+const cubeTexture = new THREE.TextureLoader().load("kona.jpeg");
+const cube = new THREE.Mesh(
+  new THREE.BoxGeometry(3, 3, 3),
+  new THREE.MeshStandardMaterial({ map: cubeTexture })
+);
+cube.position.z = -5;
+cube.position.x = 2;
 
 scene.add(cube);
 
@@ -90,15 +100,27 @@ scene.add(moon);
 
 // page scroll animation
 function moveCamera() {
+  const lerp = function (a, b, c) {
+    return a + c * (b - a);
+  };
+
   const t = document.body.getBoundingClientRect().top; // current scroll position
   moon.rotation.y += 0.075;
 
-  cube.rotation.y += 0.01
-  cube.rotation.z += 0.01
+  cube.rotation.y += 0.01;
+  cube.rotation.z += 0.01;
 
   camera.position.z = t * -0.01;
-  camera.position.x = t * -0.0002;
+  //camera.position.x = t * -0.0002;
   camera.position.y = t * -0.0002;
+
+  var h = document.documentElement,
+    b = document.body,
+    st = "scrollTop",
+    sh = "scrollHeight";
+
+  const scrollPercent = (h[st] || b[st]) / ((h[sh] || b[sh]) - h.clientHeight);
+  camera.position.x = lerp(-3, moon.position.x - 10, scrollPercent);
 }
 
 document.body.onscroll = moveCamera;
@@ -106,18 +128,27 @@ moveCamera();
 
 // render update
 function animate() {
-  requestAnimationFrame(animate);
-
   torus.rotation.x += 0.01;
   torus.rotation.y += 0.005;
   torus.rotation.z += 0.01;
 
-  cube.rotation.y += 0.003
-  cube.rotation.z += 0.003
+  cube.rotation.y += 0.003;
+  cube.rotation.z += 0.003;
 
   moon.rotation.y += 0.005;
+
   // controls.update();
   renderer.render(scene, camera);
+  requestAnimationFrame(animate);
 }
+
+window.addEventListener("resize", () => {
+  // update sizes
+  sizes.width = window.innerWidth;
+  sizes.height = window.innerHeight;
+  camera.aspect = sizes.width / sizes.height;
+  camera.updateProjectionMatrix();
+  renderer.setSize(sizes.width, sizes.height);
+});
 
 animate();
