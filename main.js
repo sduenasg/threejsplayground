@@ -50,10 +50,11 @@ const gridHelper = new three.GridHelper(200, 50);
 // const controls = new OrbitControls(camera, renderer.domElement);
 
 //stars
+const starGeometry = new three.SphereGeometry(0.15, 24, 24);
+const starMaterial = new three.MeshStandardMaterial({ color: 0xffffff });
+
 function addStar() {
-  const geometry = new three.SphereGeometry(0.25, 24, 24);
-  const material = new three.MeshStandardMaterial({ color: 0xffffff });
-  const star = new three.Mesh(geometry, material);
+  const star = new three.Mesh(starGeometry, starMaterial);
   const [x, y, z] = Array(3)
     .fill()
     .map(() => three.MathUtils.randFloatSpread(100));
@@ -70,8 +71,8 @@ scene.background = spaceTexture;
 // Avatar
 const pawTexture = new three.TextureLoader().load('paw.png');
 const paw = new three.Mesh(new three.BoxGeometry(3, 3, 3), new three.MeshBasicMaterial({ map: pawTexture }));
-paw.position.z = -1
-paw.position.x =2
+paw.position.z = -5
+paw.position.x = 2
 
 scene.add(paw);
 
