@@ -1,10 +1,10 @@
 import "./style.css";
-import * as three from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import * as THREE from "THREE";
+import { OrbitControls } from "THREE/examples/jsm/controls/OrbitControls";
 
 // scene and camera
-const scene = new three.Scene();
-const camera = new three.PerspectiveCamera(
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(
   75,
   window.innerWidth / window.innerHeight,
   0.1,
@@ -15,7 +15,7 @@ camera.position.setZ(30);
 camera.position.setX(-3);
 
 // renderer
-const renderer = new three.WebGL1Renderer({
+const renderer = new THREE.WebGL1Renderer({
   canvas: document.querySelector("#bg"),
 });
 
@@ -25,39 +25,39 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.render(scene, camera);
 
 // torus
-const geometry = new three.TorusGeometry(10, 3, 16.1);
-const material = new three.MeshStandardMaterial({
+const geometry = new THREE.TorusGeometry(10, 3, 16.1);
+const material = new THREE.MeshStandardMaterial({
   color: 0xff6347,
 });
-const torus = new three.Mesh(geometry, material);
+const torus = new THREE.Mesh(geometry, material);
 
 //scene.add(torus);
 
 // lights
-const pointLight = new three.PointLight(0xffffff);
+const pointLight = new THREE.PointLight(0xffffff);
 pointLight.position.set(5,5,5);
 scene.add(pointLight);
 
-const ambientLight = new three.AmbientLight(0xffffff);
+const ambientLight = new THREE.AmbientLight(0xffffff);
 scene.add(pointLight, ambientLight);
 
 // helpers
-const lightHelper = new three.PointLightHelper(pointLight);
-const gridHelper = new three.GridHelper(200, 50);
+const lightHelper = new THREE.PointLightHelper(pointLight);
+const gridHelper = new THREE.GridHelper(200, 50);
 //scene.add(lightHelper, gridHelper);
 
 // controls
 // const controls = new OrbitControls(camera, renderer.domElement);
 
 //stars
-const starGeometry = new three.SphereGeometry(0.15, 24, 24);
-const starMaterial = new three.MeshStandardMaterial({ color: 0xffffff });
+const starGeometry = new THREE.SphereGeometry(0.05, 24, 24);
+const starMaterial = new THREE.MeshStandardMaterial({ color: 0xf7ebda });
 
 function addStar() {
-  const star = new three.Mesh(starGeometry, starMaterial);
+  const star = new THREE.Mesh(starGeometry, starMaterial);
   const [x, y, z] = Array(3)
     .fill()
-    .map(() => three.MathUtils.randFloatSpread(100));
+    .map(() => THREE.MathUtils.randFloatSpread(100));
   star.position.set(x, y, z);
   scene.add(star);
 }
@@ -65,23 +65,23 @@ function addStar() {
 Array(200).fill().forEach(addStar);
 
 // background
-const spaceTexture = new three.TextureLoader().load("space.jpg");
+const spaceTexture = new THREE.TextureLoader().load("space.jpg");
 scene.background = spaceTexture;
 
 // Avatar
-const pawTexture = new three.TextureLoader().load('paw.png');
-const paw = new three.Mesh(new three.BoxGeometry(3, 3, 3), new three.MeshBasicMaterial({ map: pawTexture }));
-paw.position.z = -5
-paw.position.x = 2
+const cubeTexture = new THREE.TextureLoader().load('kona.jpeg');
+const cube = new THREE.Mesh(new THREE.BoxGeometry(3, 3, 3), new THREE.MeshBasicMaterial({ map: cubeTexture }));
+cube.position.z = -5
+cube.position.x = 2
 
-scene.add(paw);
+scene.add(cube);
 
 // moon
-const moonTexture = new three.TextureLoader().load("moon.jpg");
-const moonNormals = new three.TextureLoader().load("normal.jpg");
-const moon = new three.Mesh(
-  new three.SphereGeometry(3, 32, 32),
-  new three.MeshStandardMaterial({ map: moonTexture, normalMap: moonNormals })
+const moonTexture = new THREE.TextureLoader().load("moon.jpg");
+const moonNormals = new THREE.TextureLoader().load("normal.jpg");
+const moon = new THREE.Mesh(
+  new THREE.SphereGeometry(3, 32, 32),
+  new THREE.MeshStandardMaterial({ map: moonTexture, normalMap: moonNormals })
 );
 moon.position.z = 30;
 moon.position.setX(-10);
@@ -96,8 +96,8 @@ function moveCamera() {
   moon.rotation.y += 0.075;
   moon.rotation.z += 0.05;
 
-  paw.rotation.y += 0.01
-  paw.rotation.z += 0.01
+  cube.rotation.y += 0.01
+  cube.rotation.z += 0.01
 
   camera.position.z = t * -0.01;
   camera.position.x = t * -0.0002;
