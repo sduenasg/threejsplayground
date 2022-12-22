@@ -80,7 +80,7 @@ scene.add(cube);
 const moonTexture = new THREE.TextureLoader().load("moon.jpg");
 const moonNormals = new THREE.TextureLoader().load("normal.jpg");
 const moon = new THREE.Mesh(
-  new THREE.SphereGeometry(3, 32, 32),
+  new THREE.SphereGeometry(3, 64, 64),
   new THREE.MeshStandardMaterial({ map: moonTexture, normalMap: moonNormals })
 );
 moon.position.z = 30;
@@ -91,10 +91,7 @@ scene.add(moon);
 // page scroll animation
 function moveCamera() {
   const t = document.body.getBoundingClientRect().top; // current scroll position
-
-  moon.rotation.x += 0.05;
   moon.rotation.y += 0.075;
-  moon.rotation.z += 0.05;
 
   cube.rotation.y += 0.01
   cube.rotation.z += 0.01
@@ -115,7 +112,10 @@ function animate() {
   torus.rotation.y += 0.005;
   torus.rotation.z += 0.01;
 
-  moon.rotation.x += 0.005;
+  cube.rotation.y += 0.003
+  cube.rotation.z += 0.003
+
+  moon.rotation.y += 0.005;
   // controls.update();
   renderer.render(scene, camera);
 }
