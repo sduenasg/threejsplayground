@@ -1,7 +1,9 @@
-import "./style.css";
-import * as THREE from "THREE";
+import "../style.css";
+import * as THREE from "three";
 import { OrbitControls } from "THREE/examples/jsm/controls/OrbitControls";
-import { ClampToEdgeWrapping } from "THREE";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader";
+
+const airplaneUrl = new URL("../assets/airplane.glb", import.meta.url);
 
 const sizes = {
   width: window.innerWidth,
@@ -41,8 +43,7 @@ const torus = new THREE.Mesh(geometry, material);
 
 // lights
 const pointLight = new THREE.PointLight(0xffffff);
-pointLight.position.set(-15, 5, 0);
-scene.add(pointLight);
+pointLight.position.set(-15, 15, 30);
 
 const ambientLight = new THREE.AmbientLight(0x222222);
 scene.add(pointLight, ambientLight);
@@ -72,11 +73,11 @@ function addStar() {
 Array(200).fill().forEach(addStar);
 
 // background
-const spaceTexture = new THREE.TextureLoader().load("space.jpg");
+const spaceTexture = new THREE.TextureLoader().load("./assets/space.jpg");
 scene.background = spaceTexture;
 
 // cube
-const cubeTexture = new THREE.TextureLoader().load("kona.jpeg");
+const cubeTexture = new THREE.TextureLoader().load("./assets/kona.jpeg");
 const cube = new THREE.Mesh(
   new THREE.BoxGeometry(3, 3, 3),
   new THREE.MeshStandardMaterial({ map: cubeTexture })
@@ -87,8 +88,8 @@ cube.position.x = 2;
 scene.add(cube);
 
 // moon
-const moonTexture = new THREE.TextureLoader().load("moon.jpg");
-const moonNormals = new THREE.TextureLoader().load("normal.jpg");
+const moonTexture = new THREE.TextureLoader().load("./assets/moon.jpg");
+const moonNormals = new THREE.TextureLoader().load("./assets/normal.jpg");
 const moon = new THREE.Mesh(
   new THREE.SphereGeometry(3, 64, 64),
   new THREE.MeshStandardMaterial({ map: moonTexture, normalMap: moonNormals })
@@ -97,6 +98,26 @@ moon.position.z = 30;
 moon.position.setX(-10);
 
 scene.add(moon);
+
+// blender model
+
+const assetLoader = new GLTFLoader();
+assetLoader.load(airplaneUrl.href, function(gltf){
+  const model = gltf.scene;
+  model.scale.x = .1
+  model.scale.y = .1
+  model.scale.z = .1
+
+  model.rotation.y = -1.5
+
+  model.position.z = 18
+  model.position.x = -20
+  scene.add(model)
+
+ //model.position()
+},undefined, function(error){
+  alert('Error')
+});
 
 // page scroll animation
 function moveCamera() {
@@ -120,7 +141,7 @@ function moveCamera() {
     sh = "scrollHeight";
 
   const scrollPercent = (h[st] || b[st]) / ((h[sh] || b[sh]) - h.clientHeight);
-  camera.position.x = lerp(-3, moon.position.x - 10, scrollPercent);
+  camera.position.x = lerp(-3, moon.position.x - 8, scrollPercent);
 }
 
 document.body.onscroll = moveCamera;
@@ -128,9 +149,9 @@ moveCamera();
 
 // render update
 function animate() {
-  torus.rotation.x += 0.01;
-  torus.rotation.y += 0.005;
-  torus.rotation.z += 0.01;
+  // torus.rotation.x += 0.01;
+  // torus.rotation.y += 0.005;
+  // torus.rotation.z += 0.01;
 
   cube.rotation.y += 0.003;
   cube.rotation.z += 0.003;
