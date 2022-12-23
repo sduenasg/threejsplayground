@@ -6,7 +6,6 @@ const airplaneUrl = new URL("../assets/airplane.glb", import.meta.url);
 const catUrl = new URL("../assets/cat.glb", import.meta.url);
 const cerditoUrl = new URL("../assets/cerdito.glb", import.meta.url);
 
-
 const clock = new THREE.Clock();
 let mixers = [];
 
@@ -76,7 +75,7 @@ function addStar() {
   scene.add(star);
 }
 
-Array(200).fill().forEach(addStar);
+Array(250).fill().forEach(addStar);
 
 // background
 const spaceTexture = new THREE.TextureLoader().load("./assets/space.jpg");
@@ -105,8 +104,7 @@ moon.position.setX(-10);
 
 scene.add(moon);
 
-// blender model
-
+// blender models
 const assetLoader = new GLTFLoader();
 
 let airplane = new THREE.Mesh();
@@ -125,9 +123,9 @@ assetLoader.load(
     const mixer = new THREE.AnimationMixer(gltf.scene);
     mixers.push(mixer);
 
-    gltf.animations.forEach((animation, index) => {
-      console.log(index + " " + animation.name);
-    });
+    // gltf.animations.forEach((animation, index) => {
+    //   console.log(index + " " + animation.name);
+    // });
 
     const propeller = mixer.clipAction(gltf.animations[2]);
     propeller.setLoop(THREE.LoopRepeat);
@@ -144,32 +142,23 @@ assetLoader.load(
   }
 );
 
-
-
 let catmodel = new THREE.Mesh();
 assetLoader.load(
   catUrl.href,
   function (gltf) {
     catmodel = gltf.scene;
-
     catmodel.position.set(-24, -3, 25);
-    
-
     catmodel.rotateY(Math.PI / 3);
 
     //gltf.animations.forEach((animation, index) => {
     //  console.log(index + " " + animation.name);
     //});
-
     const catmixer = new THREE.AnimationMixer(gltf.scene);
     mixers.push(catmixer);
-
     // Get an AnimationAction for a specific animation
     const action = catmixer.clipAction(gltf.animations[11]);
-
     // Set the loop property to THREE.LoopRepeat
     action.setLoop(THREE.LoopRepeat);
-
     // Start playing the animation
     action.play();
 
@@ -187,18 +176,18 @@ assetLoader.load(
   function (gltf) {
     cerdito = gltf.scene;
     cerdito.position.set(0, -3, 12);
-    cerdito.rotateY(Math.PI/1.01);
+    cerdito.rotateY(Math.PI / 1.01);
     scene.add(cerdito);
   },
   undefined,
   function (error) {
-    alert("Error loading cat model " + error);
+    alert("Error loading pig model " + error);
   }
 );
 
 let nextCameraPosition = new THREE.Vector3(-3, 0, 30);
 // page scroll animation
-function moveCamera() {
+function onDocumentScroll() {
   const lerp = function (a, b, c) {
     return a + c * (b - a);
   };
@@ -217,26 +206,25 @@ function moveCamera() {
   nextCameraPosition.x = lerp(-3, moon.position.x - 8, scrollPercent);
 }
 
-document.body.onscroll = moveCamera;
-moveCamera();
+document.body.onscroll = onDocumentScroll;
+onDocumentScroll();
 
 // render update
 
-let step = 0
-const speed = 0.05
+let step = 0;
+const speed = 0.05;
 
 function mainLoop() {
   step += speed;
 
-  animateCamera()
-  const distanceToCameraTarget = camera.position.distanceTo(nextCameraPosition)
+  animateCamera();
+  const distanceToCameraTarget = camera.position.distanceTo(nextCameraPosition);
 
-  animateCamera()
-  animateAirplane()
-  animatePig()
-  animateCube(distanceToCameraTarget)
-  animateMoon(distanceToCameraTarget)
-  animateCat()
+  animateAirplane();
+  animatePig();
+  animateCube(distanceToCameraTarget);
+  animateMoon(distanceToCameraTarget);
+  animateCat();
 
   // controls.update();
   renderer.render(scene, camera);
@@ -264,26 +252,39 @@ const animateMoon = (distanceToCameraTarget) => {
   moon.rotation.y += 0.075 * distanceToCameraTarget;
 };
 
-
 const animateAirplane = () => {
-  airplane.position.y = 0.5 * Math.sin(step)
-  airplane.position.x = -20 + 1 * Math.sin(step)
-  airplane.rotateZ(-0.01 * Math.sin(step))
-  airplane.rotateY(-0.004 * Math.cos(step+ Math.PI/4))
+  airplane.position.y = 0.5 * Math.sin(step);
+  airplane.position.x = -20 + 1 * Math.sin(step);
+
+  const q = new THREE.Quaternion();
+  q.setFromAxisAngle(
+    new THREE.Vector3(0, 1, 0),
+    -0.004 * Math.sin(step + Math.PI / 4)
+  );
+
+  const q2 = new THREE.Quaternion();
+  q2.setFromAxisAngle(
+    new THREE.Vector3(0, 0, 1),
+    -0.01 * Math.sin(step)
+  );
+
+  airplane.setRotationFromQuaternion(airplane.quaternion.multiply(q2));
+
+  //airplane.rotateZ(-0.01 * Math.sin(step));
+  //airplane.rotateY(-0.004 * Math.sin(step + Math.PI/4))
 };
 
 const animatePig = () => {
-  cerdito.position.y = 0.8 * Math.cos(step)
-  cerdito.position.x = -3 + 1 * Math.cos(step)
-  cerdito.rotateZ(-0.01 * Math.cos(step))
+  cerdito.position.y = 0.8 * Math.cos(step);
+  cerdito.position.x = -3 + 1 * Math.cos(step);
+  cerdito.rotateZ(-0.01 * Math.cos(step));
 };
 
 const animateCat = () => {
-  catmodel.position.y = -3 + 0.08 * Math.sin(step)
-  catmodel.position.x = -24 + 0.05 * Math.sin(step)
+  catmodel.position.y = -3 + 0.08 * Math.sin(step);
+  catmodel.position.x = -24 + 0.05 * Math.sin(step);
   //catmodel.rotateZ(-0.01 * Math.sin(step))
 };
-
 
 window.addEventListener("resize", () => {
   // update sizes
