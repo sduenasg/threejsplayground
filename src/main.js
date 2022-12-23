@@ -1,6 +1,7 @@
 import "../style.css";
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader";
+import { Mesh } from "three";
 
 const airplaneUrl = new URL("../assets/airplane.glb", import.meta.url);
 const catUrl = new URL("../assets/cat.glb", import.meta.url);
@@ -63,19 +64,26 @@ const axesHelper = new THREE.AxesHelper(5);
 // const controls = new OrbitControls(camera, renderer.domElement);
 
 //stars
+const numOfStars = 500
 const starGeometry = new THREE.SphereGeometry(0.05, 16, 16);
 const starMaterial = new THREE.MeshBasicMaterial({ color: 0xf7ebda });
+const star = new THREE.InstancedMesh(starGeometry, starMaterial, numOfStars);
 
-function addStar() {
-  const star = new THREE.Mesh(starGeometry, starMaterial);
+
+function addStar(index) {
   const [x, y, z] = Array(3)
     .fill()
     .map(() => THREE.MathUtils.randFloatSpread(100));
-  star.position.set(x, y, z);
-  scene.add(star);
+
+
+  const dummy = new THREE.Object3D();
+  dummy.position.set(x, y, z);
+  dummy.updateMatrix();
+  star.setMatrixAt(index, dummy.matrix);
 }
 
-Array(250).fill().forEach(addStar);
+Array(numOfStars).fill().forEach((item, index) =>addStar(index));
+scene.add(star);
 
 // background
 const spaceTexture = new THREE.TextureLoader().load("./assets/space.jpg");
@@ -263,10 +271,7 @@ const animateAirplane = () => {
   );
 
   const q2 = new THREE.Quaternion();
-  q2.setFromAxisAngle(
-    new THREE.Vector3(0, 0, 1),
-    -0.01 * Math.sin(step)
-  );
+  q2.setFromAxisAngle(new THREE.Vector3(0, 0, 1), -0.01 * Math.sin(step));
 
   airplane.setRotationFromQuaternion(airplane.quaternion.multiply(q2));
 
