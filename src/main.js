@@ -143,9 +143,9 @@ assetLoader.load(
 
     catmodel.rotateY(Math.PI / 3);
 
-    gltf.animations.forEach((animation, index) => {
-      console.log(index + " " + animation.name);
-    });
+    //gltf.animations.forEach((animation, index) => {
+    //  console.log(index + " " + animation.name);
+    //});
 
     catmixer = new THREE.AnimationMixer(gltf.scene);
 
@@ -154,7 +154,7 @@ assetLoader.load(
 
     // Set the loop property to THREE.LoopRepeat
     action.setLoop(THREE.LoopRepeat);
-    console.log(gltf.animations[5]);
+  
     // Start playing the animation
     action.play();
   },
