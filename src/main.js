@@ -1,9 +1,10 @@
 import "../style.css";
 import * as THREE from "three";
-import { OrbitControls } from "THREE/examples/jsm/controls/OrbitControls";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader";
 
 const airplaneUrl = new URL("../assets/airplane.glb", import.meta.url);
+const catUrl = new URL("../assets/cat.glb", import.meta.url);
+const clock = new THREE.Clock();
 
 const sizes = {
   width: window.innerWidth,
@@ -25,13 +26,14 @@ camera.position.setX(-3);
 // renderer
 const renderer = new THREE.WebGL1Renderer({
   canvas: document.querySelector("#bg"),
+  antialias: true,
 });
 
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(sizes.width, sizes.height);
 
 renderer.render(scene, camera);
-
+//renderer.physicallyCorrectLights = true;
 // torus
 const geometry = new THREE.TorusGeometry(10, 3, 16.1);
 const material = new THREE.MeshStandardMaterial({
@@ -102,23 +104,68 @@ scene.add(moon);
 // blender model
 
 const assetLoader = new GLTFLoader();
-assetLoader.load(airplaneUrl.href, function(gltf){
-  const model = gltf.scene;
-  model.scale.x = .1
-  model.scale.y = .1
-  model.scale.z = .1
+assetLoader.load(
+  airplaneUrl.href,
+  function (gltf) {
+    const airplane = gltf.scene;
+    airplane.scale.x = 0.1;
+    airplane.scale.y = 0.1;
+    airplane.scale.z = 0.1;
 
-  model.rotation.y = -1.5
+    airplane.position.z = 18;
+    airplane.position.x = -20;
 
-  model.position.z = 18
-  model.position.x = -20
-  scene.add(model)
+    scene.add(airplane);
+    airplane.rotateY(-Math.PI / 1.8);
+    airplane.rotateX(-Math.PI / 12);
 
- //model.position()
-},undefined, function(error){
-  alert('Error')
-});
+    gltf.animations.forEach((animation) => {
+      console.log(animation.name);
+    });
+  },
+  undefined,
+  function (error) {
+    alert("Error loading airplane model " + error);
+  }
+);
 
+let catmixer;
+
+assetLoader.load(
+  catUrl.href,
+  function (gltf) {
+    const catmodel = gltf.scene;
+
+    catmodel.position.z = 25;
+    catmodel.position.x = -24;
+    catmodel.position.y = -3;
+    scene.add(catmodel);
+
+    catmodel.rotateY(Math.PI / 3);
+
+    gltf.animations.forEach((animation, index) => {
+      console.log(index + " " + animation.name);
+    });
+
+    catmixer = new THREE.AnimationMixer(gltf.scene);
+
+    // Get an AnimationAction for a specific animation
+    const action = catmixer.clipAction(gltf.animations[6]);
+
+    // Set the loop property to THREE.LoopRepeat
+    action.setLoop(THREE.LoopRepeat);
+
+    console.log(gltf.animations[5]);
+    // Start playing the animation
+    action.play();
+  },
+  undefined,
+  function (error) {
+    alert("Error loading cat model " + error);
+  }
+);
+
+let nextCameraPosition = new THREE.Vector3(-3, 0, 30);
 // page scroll animation
 function moveCamera() {
   const lerp = function (a, b, c) {
@@ -131,17 +178,18 @@ function moveCamera() {
   cube.rotation.y += 0.01;
   cube.rotation.z += 0.01;
 
-  camera.position.z = t * -0.01;
-  //camera.position.x = t * -0.0002;
-  camera.position.y = t * -0.0002;
-
   var h = document.documentElement,
     b = document.body,
     st = "scrollTop",
     sh = "scrollHeight";
 
   const scrollPercent = (h[st] || b[st]) / ((h[sh] || b[sh]) - h.clientHeight);
-  camera.position.x = lerp(-3, moon.position.x - 8, scrollPercent);
+
+  // next camera position to lerp to
+  nextCameraPosition.z = t * -0.01;
+  nextCameraPosition.y = t * -0.0002;
+  nextCameraPosition.x = lerp(-3, moon.position.x - 8, scrollPercent);
+
 }
 
 document.body.onscroll = moveCamera;
@@ -149,9 +197,9 @@ moveCamera();
 
 // render update
 function animate() {
-  // torus.rotation.x += 0.01;
-  // torus.rotation.y += 0.005;
-  // torus.rotation.z += 0.01;
+
+  const cameraPosition = camera.position.lerp(nextCameraPosition, 0.1)
+  camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z)
 
   cube.rotation.y += 0.003;
   cube.rotation.z += 0.003;
@@ -160,6 +208,10 @@ function animate() {
 
   // controls.update();
   renderer.render(scene, camera);
+
+  // Update objects
+  const delta = clock.getDelta();
+  //catmixer.update(delta);
   requestAnimationFrame(animate);
 }
 
