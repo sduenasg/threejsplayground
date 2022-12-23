@@ -4,6 +4,9 @@ import { GLTFLoader } from "three/addons/loaders/GLTFLoader";
 
 const airplaneUrl = new URL("../assets/airplane.glb", import.meta.url);
 const catUrl = new URL("../assets/cat.glb", import.meta.url);
+const cerditoUrl = new URL("../assets/cerdito.glb", import.meta.url);
+
+
 const clock = new THREE.Clock();
 let mixers = [];
 
@@ -48,7 +51,7 @@ const torus = new THREE.Mesh(geometry, material);
 const pointLight = new THREE.PointLight(0xffffff);
 pointLight.position.set(-15, 15, 50);
 
-const ambientLight = new THREE.AmbientLight(0x222222);
+const ambientLight = new THREE.AmbientLight(0x232e63);
 scene.add(pointLight, ambientLight);
 
 // helpers
@@ -61,7 +64,7 @@ const axesHelper = new THREE.AxesHelper(5);
 // const controls = new OrbitControls(camera, renderer.domElement);
 
 //stars
-const starGeometry = new THREE.SphereGeometry(0.05, 24, 24);
+const starGeometry = new THREE.SphereGeometry(0.05, 16, 16);
 const starMaterial = new THREE.MeshBasicMaterial({ color: 0xf7ebda });
 
 function addStar() {
@@ -97,7 +100,7 @@ const moon = new THREE.Mesh(
   new THREE.SphereGeometry(3, 64, 64),
   new THREE.MeshStandardMaterial({ map: moonTexture, normalMap: moonNormals })
 );
-moon.position.z = 30;
+moon.position.z = 35;
 moon.position.setX(-10);
 
 scene.add(moon);
@@ -133,13 +136,16 @@ assetLoader.load(
   }
 );
 
+
+
+let catmodel = new THREE.Mesh();
 assetLoader.load(
   catUrl.href,
   function (gltf) {
-    const catmodel = gltf.scene;
+    catmodel = gltf.scene;
 
     catmodel.position.set(-24, -3, 25);
-    scene.add(catmodel);
+    
 
     catmodel.rotateY(Math.PI / 3);
 
@@ -158,6 +164,23 @@ assetLoader.load(
 
     // Start playing the animation
     action.play();
+
+    scene.add(catmodel);
+  },
+  undefined,
+  function (error) {
+    alert("Error loading cat model " + error);
+  }
+);
+
+let cerdito = new THREE.Mesh();
+assetLoader.load(
+  cerditoUrl.href,
+  function (gltf) {
+    cerdito = gltf.scene;
+    cerdito.position.set(0, -3, 12);
+    cerdito.rotateY(Math.PI/1.01);
+    scene.add(cerdito);
   },
   undefined,
   function (error) {
@@ -173,11 +196,6 @@ function moveCamera() {
   };
 
   const t = document.body.getBoundingClientRect().top; // current scroll position
-  moon.rotation.y += 0.075;
-
-  cube.rotation.y += 0.01;
-  cube.rotation.z += 0.01;
-
   var h = document.documentElement,
     b = document.body,
     st = "scrollTop",
@@ -195,33 +213,68 @@ document.body.onscroll = moveCamera;
 moveCamera();
 
 // render update
-function animate() {
-  const cameraPosition = camera.position.lerp(nextCameraPosition, 0.1);
-  camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);
 
-  cube.rotation.y += 0.003;
-  cube.rotation.z += 0.003;
+let step = 0
+const speed = 0.05
 
-  moon.rotation.y += 0.005;
+function mainLoop() {
+  step += speed;
 
+  animateCamera()
+  const distanceToCameraTarget = camera.position.distanceTo(nextCameraPosition)
+
+  animateCamera()
   animateAirplane()
+  animatePig()
+  animateCube(distanceToCameraTarget)
+  animateMoon(distanceToCameraTarget)
+  animateCat()
+
   // controls.update();
   renderer.render(scene, camera);
 
   var delta = clock.getDelta();
   mixers.forEach((mixer) => mixer.update(delta));
 
-  requestAnimationFrame(animate);
+  requestAnimationFrame(mainLoop);
 }
 
-let step = 0
-const speed = 0.05
-const animateAirplane = () => {
-  step += speed;
-  airplane.position.y = 0.5 * Math.sin(step)
-
-  airplane.rotateZ(0.01 * Math.sin(step))
+const animateCamera = () => {
+  const cameraPosition = camera.position.lerp(nextCameraPosition, 0.08);
+  camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);
 };
+
+const animateCube = (distanceToCameraTarget) => {
+  cube.rotation.y += 0.003;
+  cube.rotation.z += 0.003;
+  cube.rotation.y += 0.01 * distanceToCameraTarget;
+  cube.rotation.z += 0.01 * distanceToCameraTarget;
+};
+
+const animateMoon = (distanceToCameraTarget) => {
+  moon.rotation.y += 0.005;
+  moon.rotation.y += 0.075 * distanceToCameraTarget;
+};
+
+
+const animateAirplane = () => {
+  airplane.position.y = 0.5 * Math.sin(step)
+  airplane.position.x = -20 + 1 * Math.sin(step)
+  airplane.rotateZ(-0.01 * Math.sin(step))
+};
+
+const animatePig = () => {
+  cerdito.position.y = 0.8 * Math.cos(step)
+  cerdito.position.x = -3 + 1 * Math.cos(step)
+  cerdito.rotateZ(-0.01 * Math.cos(step))
+};
+
+const animateCat = () => {
+  catmodel.position.y = -3 + 0.08 * Math.sin(step)
+  catmodel.position.x = -24 + 0.05 * Math.sin(step)
+  //catmodel.rotateZ(-0.01 * Math.sin(step))
+};
+
 
 window.addEventListener("resize", () => {
   // update sizes
@@ -232,4 +285,4 @@ window.addEventListener("resize", () => {
   renderer.setSize(sizes.width, sizes.height);
 });
 
-animate();
+mainLoop();
