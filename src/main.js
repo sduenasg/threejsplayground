@@ -45,7 +45,7 @@ const torus = new THREE.Mesh(geometry, material);
 
 // lights
 const pointLight = new THREE.PointLight(0xffffff);
-pointLight.position.set(-15, 15, 30);
+pointLight.position.set(-15, 15, 50);
 
 const ambientLight = new THREE.AmbientLight(0x222222);
 scene.add(pointLight, ambientLight);
@@ -150,7 +150,7 @@ assetLoader.load(
     catmixer = new THREE.AnimationMixer(gltf.scene);
 
     // Get an AnimationAction for a specific animation
-    const action = catmixer.clipAction(gltf.animations[8]);
+    const action = catmixer.clipAction(gltf.animations[11]);
 
     // Set the loop property to THREE.LoopRepeat
     action.setLoop(THREE.LoopRepeat);
