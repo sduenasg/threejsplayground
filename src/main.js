@@ -129,7 +129,7 @@ assetLoader.load(
   }
 );
 
-let catmixer;
+let catmixer = new THREE.AnimationMixer();
 
 assetLoader.load(
   catUrl.href,
@@ -150,11 +150,10 @@ assetLoader.load(
     catmixer = new THREE.AnimationMixer(gltf.scene);
 
     // Get an AnimationAction for a specific animation
-    const action = catmixer.clipAction(gltf.animations[6]);
+    const action = catmixer.clipAction(gltf.animations[8]);
 
     // Set the loop property to THREE.LoopRepeat
     action.setLoop(THREE.LoopRepeat);
-
     console.log(gltf.animations[5]);
     // Start playing the animation
     action.play();
@@ -209,9 +208,8 @@ function animate() {
   // controls.update();
   renderer.render(scene, camera);
 
-  // Update objects
-  const delta = clock.getDelta();
-  //catmixer.update(delta);
+
+  catmixer.update(clock.getDelta());
   requestAnimationFrame(animate);
 }
 
