@@ -125,10 +125,18 @@ assetLoader.load(
     const mixer = new THREE.AnimationMixer(gltf.scene);
     mixers.push(mixer);
 
-    const action = mixer.clipAction(gltf.animations[0]);
-    action.setLoop(THREE.LoopRepeat);
-    action.timeScale = 5;
-    action.play();
+    gltf.animations.forEach((animation, index) => {
+      console.log(index + " " + animation.name);
+    });
+
+    const propeller = mixer.clipAction(gltf.animations[2]);
+    propeller.setLoop(THREE.LoopRepeat);
+    propeller.timeScale = 5;
+    propeller.play();
+
+    const flying = mixer.clipAction(gltf.animations[1]);
+    flying.setLoop(THREE.LoopRepeat);
+    flying.play();
   },
   undefined,
   function (error) {
@@ -261,6 +269,7 @@ const animateAirplane = () => {
   airplane.position.y = 0.5 * Math.sin(step)
   airplane.position.x = -20 + 1 * Math.sin(step)
   airplane.rotateZ(-0.01 * Math.sin(step))
+  airplane.rotateY(-0.004 * Math.cos(step+ Math.PI/4))
 };
 
 const animatePig = () => {
