@@ -5,6 +5,7 @@ import { GLTFLoader } from "three/addons/loaders/GLTFLoader";
 const airplaneUrl = new URL("../assets/airplane.glb", import.meta.url);
 const catUrl = new URL("../assets/cat.glb", import.meta.url);
 const clock = new THREE.Clock();
+let mixers = [];
 
 const sizes = {
   width: window.innerWidth,
@@ -104,24 +105,27 @@ scene.add(moon);
 // blender model
 
 const assetLoader = new GLTFLoader();
+
+let airplane = new THREE.Mesh();
 assetLoader.load(
   airplaneUrl.href,
   function (gltf) {
-    const airplane = gltf.scene;
-    airplane.scale.x = 0.1;
-    airplane.scale.y = 0.1;
-    airplane.scale.z = 0.1;
+    airplane = gltf.scene;
 
-    airplane.position.z = 18;
-    airplane.position.x = -20;
+    airplane.scale.set(0.1, 0.1, 0.1);
+    airplane.position.set(-20, 0, 18);
 
     scene.add(airplane);
     airplane.rotateY(-Math.PI / 1.8);
     airplane.rotateX(-Math.PI / 12);
 
-    gltf.animations.forEach((animation) => {
-      console.log(animation.name);
-    });
+    const mixer = new THREE.AnimationMixer(gltf.scene);
+    mixers.push(mixer);
+
+    const action = mixer.clipAction(gltf.animations[0]);
+    action.setLoop(THREE.LoopRepeat);
+    action.timeScale = 5;
+    action.play();
   },
   undefined,
   function (error) {
@@ -129,16 +133,12 @@ assetLoader.load(
   }
 );
 
-let catmixer = new THREE.AnimationMixer();
-
 assetLoader.load(
   catUrl.href,
   function (gltf) {
     const catmodel = gltf.scene;
 
-    catmodel.position.z = 25;
-    catmodel.position.x = -24;
-    catmodel.position.y = -3;
+    catmodel.position.set(-24, -3, 25);
     scene.add(catmodel);
 
     catmodel.rotateY(Math.PI / 3);
@@ -147,14 +147,15 @@ assetLoader.load(
     //  console.log(index + " " + animation.name);
     //});
 
-    catmixer = new THREE.AnimationMixer(gltf.scene);
+    const catmixer = new THREE.AnimationMixer(gltf.scene);
+    mixers.push(catmixer);
 
     // Get an AnimationAction for a specific animation
     const action = catmixer.clipAction(gltf.animations[11]);
 
     // Set the loop property to THREE.LoopRepeat
     action.setLoop(THREE.LoopRepeat);
-  
+
     // Start playing the animation
     action.play();
   },
@@ -188,7 +189,6 @@ function moveCamera() {
   nextCameraPosition.z = t * -0.01;
   nextCameraPosition.y = t * -0.0002;
   nextCameraPosition.x = lerp(-3, moon.position.x - 8, scrollPercent);
-
 }
 
 document.body.onscroll = moveCamera;
@@ -196,22 +196,32 @@ moveCamera();
 
 // render update
 function animate() {
-
-  const cameraPosition = camera.position.lerp(nextCameraPosition, 0.1)
-  camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z)
+  const cameraPosition = camera.position.lerp(nextCameraPosition, 0.1);
+  camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);
 
   cube.rotation.y += 0.003;
   cube.rotation.z += 0.003;
 
   moon.rotation.y += 0.005;
 
+  animateAirplane()
   // controls.update();
   renderer.render(scene, camera);
 
+  var delta = clock.getDelta();
+  mixers.forEach((mixer) => mixer.update(delta));
 
-  catmixer.update(clock.getDelta());
   requestAnimationFrame(animate);
 }
+
+let step = 0
+const speed = 0.05
+const animateAirplane = () => {
+  step += speed;
+  airplane.position.y = 0.5 * Math.sin(step)
+
+  airplane.rotateZ(0.01 * Math.sin(step))
+};
 
 window.addEventListener("resize", () => {
   // update sizes
